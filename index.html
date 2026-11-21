@@ -51,39 +51,37 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac2);outli
 </style>
 </head>
 <body>
-<header class="top"><div><label class="dt"><small id="date"></small><input type="date" id="dp" onchange="setDate(this.value)" aria-label="তারিখ বদলান"></label><h1>হোটেল রান্না ও বাজার লিস্ট</h1></div></header>
+<header class="top"><div><label class="dt"><small id="date"></small><input type="date" id="dp" aria-label="তারিখ বদলান"></label><h1>হোটেল রান্না ও বাজার লিস্ট</h1></div></header>
 <main>
-
 <h2>♨️ রান্নার হিসাব</h2>
-<div class="hint">আজ কোনটা কতটুকু রান্না হয়েছে বা আছে।</div>
+<div class="hint">আজ কোনটা কতটুকু রান্না হয়েছে বা আছে। যেটা লিখবেন শুধু সেটাই সারাংশে যাবে।</div>
 <div id="cook"></div>
 
 <h2>কোন দোকান থেকে কী লাগবে</h2>
 <div class="hint">যেটা লাগবে শুধু তার পরিমাণ লিখুন। ফাঁকা থাকলে লিস্টে আসবে না।</div>
 <div id="shops"></div>
-<button class="btn g" onclick="addShop()">+ নতুন দোকান</button>
+<div class="add"><input id="ns" placeholder="নতুন দোকানের নাম"><button class="btn g" data-act="addShop">+ দোকান</button></div>
 
 <h2>মালিকের জন্য সারাংশ (নিজে নিজে তৈরি)</h2>
 <div id="sum" class="sum"></div>
 <div class="row">
-<button class="btn y" onclick="share()">WhatsApp এ পাঠান</button>
-<button class="btn g" onclick="copyList()">কপি করুন</button>
-<button class="btn g" onclick="clearNeeds()">লাগবে সব মুছুন</button>
+<button class="btn y" data-act="share">WhatsApp এ পাঠান</button>
+<button class="btn g" data-act="copy">কপি করুন</button>
+<button class="btn g" data-act="clear">সব মুছুন</button>
 </div>
 <div id="msg" style="color:var(--mu);font-size:14px;margin-top:8px"></div>
 <textarea id="box" readonly hidden rows="9" style="width:100%;margin-top:8px;font:inherit;font-size:15px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px"></textarea>
 </main>
-
 <script>
-var KEY="hotelV2",U=["কেজি","গ্রাম","লিটার","পিস","প্যাকেট","ডজন","বস্তা","বোতল","প্লেট"];
+var KEY="hotelV4",U=["কেজি","গ্রাম","লিটার","পিস","প্যাকেট","ডজন","বস্তা","বোতল","প্লেট"];
 function mk(names,u){return names.map(function(n){return{n:n,q:"",u:u}})}
 function seed(){
 var f=mk(["পোলাও চাল","খিচুড়ি চাল","মিনিকেট চাল","ময়দা","তেল (নাস্তা + বিরিয়ানি)","বুটের ডাল","আলু","পেয়াজ","ম্যাগী মসলা","আদা","রসুন","টেস্টিং সল্ট","চিকন লবণ","মোটা লবন","গুড়ো মরিচ","হলুদ","ধনিয়া","আস্ত জিরা","শাহি জিরা","কিসমিস","আলু বোখারা","পাচ ফোড়ন"],"কেজি");
-f=f.concat([{n:"কেওড়া জল",q:"",u:"বোতল"},{n:"কাপর ধোয়ার সোডা",q:"",u:"প্যাকেট"},{n:"হুইল পাউডার",q:"",u:"প্যাকেট"},{n:"মিনি সাবান",q:"",u:"পিস"}]);
 f[4].u="লিটার";
-return{cook:[["পোলাও",3,"কেজি"],["খিচুড়ি",6,"প্লেট"],["সাদা ভাত",500,"গ্রাম"],["চিকেন রোস্ট",19,"পিস"],["চিকেন কারি",0,"পিস"],["ডিম সিদ্ধ",24,"পিস"],["ডিম ভুনা",5,"পিস"],["তেহারির মাংস",2,"প্যাকেট"],["বিফ রেজালা",0,"পিস"],["মাছ কারি",0,"পিস"],["সিংগাড়া",125,"পিস"],["ডিম চপ",12,"পিস"]].map(function(a){return{n:a[0],q:a[1],u:a[2]}}),
+f=f.concat([{n:"কেওড়া জল",q:"",u:"বোতল"},{n:"কাপর ধোয়ার সোডা",q:"",u:"প্যাকেট"},{n:"হুইল পাউডার",q:"",u:"প্যাকেট"},{n:"মিনি সাবান",q:"",u:"পিস"}]);
+return{cook:[["পোলাও","কেজি"],["খিচুড়ি","প্লেট"],["সাদা ভাত","গ্রাম"],["চিকেন রোস্ট","পিস"],["চিকেন কারি","পিস"],["ডিম সিদ্ধ","পিস"],["ডিম ভুনা","পিস"],["তেহারির মাংস","প্যাকেট"],["বিফ রেজালা","পিস"],["মাছ কারি","পিস"],["সিংগাড়া","পিস"],["ডিম চপ","পিস"]].map(function(a){return{n:a[0],q:"",u:a[1]}}),
 shops:[
-{name:"ফাহিম স্টোর (গ্রোসারি)",items:f},
+{name:"গ্রোসারি (ফাহিম স্টোর)",items:f},
 {name:"আরং এর গাড়ি",items:mk(["টক দই"],"কেজি")},
 {name:"লিটন (চিকেন এন্ড ফিশ শপ)",items:mk(["চিকেন","মাছ"],"কেজি")},
 {name:"বেংগল মীট",items:mk(["তেহারি মাংস","চিকেন"],"কেজি")},
@@ -92,46 +90,37 @@ shops:[
 {name:"স্টেশনারি (সামিন ডিসপো সেন্টার)",items:mk(["বড়ো কাগজের ঠোংগা","মাঝারি কাগজের ঠোংগা","ছোট কাগজের ঠোংগা","টিস্যু পেপার","১ কেজির হ্যান্ড পলি","৩ কেজির হ্যান্ড পলি","৫ কেজি হ্যান্ড পলি","কালো ময়লার পলি","ফুড গ্রেড মিনি পলি","সস পলি","কফি কাপ","হ্যান্ড গ্লোভস","জি ক্যাপ","কোকের স্ট্রো","তেহেরীর বক্স","চিকেন পোলাও এর বক্স","থ্রি চেম্বার বক্স","বিরিয়ানি প্লাস্টিক বাটি"],"প্যাকেট")}
 ]}}
 var D=seed();
-try{var r=localStorage.getItem(KEY);if(r)D=JSON.parse(r)}catch(e){}
+try{var r=JSON.parse(localStorage.getItem(KEY)||"null");if(r&&r.cook&&r.shops)D=r}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function $(i){return document.getElementById(i)}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function bn(v){return String(v).replace(/\d/g,function(d){return"০১২৩৪৫৬৭৮৯"[d]})}
-function usel(u,cb){return'<select class="u" onchange="'+cb+'">'+U.map(function(x){return"<option"+(x==u?" selected":"")+">"+x+"</option>"}).join("")+"</select>"}
-function row(a,k,fn){return'<div class="it"><span class="nm">'+esc(a.n)+'</span><input class="q" type="number" min="0" step="any" placeholder="–" value="'+a.q+'" onchange="'+fn+'(\'q\',this.value)">'+usel(a.u,fn+"('u',this.value)")+'<button class="x" onclick="'+fn.replace("set","del").replace(/,$/,")")+'">✕</button></div>'}
+function list(g){return g=="c"?D.cook:D.shops[+g.slice(1)].items}
+function filled(a){return a.q!==""&&a.q!==null&&a.q!==undefined&&+a.q>0}
+function row(a,g,i){var d='data-g="'+g+'" data-i="'+i+'"';
+var sel='<select class="u" '+d+' data-f="u">'+U.map(function(x){return"<option"+(x==a.u?" selected":"")+">"+x+"</option>"}).join("")+"</select>";
+return'<div class="it"><span class="nm">'+esc(a.n)+'</span><input class="q" type="number" inputmode="decimal" min="0" step="any" placeholder="–" value="'+(filled(a)||a.q===0?a.q:"")+'" '+d+' data-f="q">'+sel+'<button class="x" '+d+' data-act="del" aria-label="মুছুন">✕</button></div>'}
+function addrow(g,ph){return'<div class="add"><input id="ai-'+g+'" placeholder="'+ph+'"><button class="btn" data-act="add" data-g="'+g+'">যোগ</button></div>'}
 function render(){
-var h='<div class="card">';
-D.cook.forEach(function(a,i){h+=row(a,i,"setC("+i+",")});
-h+='<div class="add"><input id="cn" placeholder="নতুন রান্নার আইটেম"><button class="btn" onclick="addC()">যোগ</button></div></div>';
-$("cook").innerHTML=h;
-h="";
-D.shops.forEach(function(s,si){
-var cn=s.items.filter(function(a){return a.q!==""&&+a.q>0}).length;h+='<div class="sh"><span>'+esc(s.name)+(cn?'<span class="badge">'+bn(cn)+'</span>':'')+'</span><button class="x" onclick="delShop('+si+')" title="দোকান মুছুন">✕</button></div><div class="card shopcard">';
-s.items.forEach(function(a,ii){h+=row(a,ii,"setI("+si+","+ii+",")});
-h+='<div class="add"><input id="in'+si+'" placeholder="নতুন আইটেম"><button class="btn" onclick="addI('+si+')">যোগ</button></div></div>'});
-$("shops").innerHTML=h;summary()}
-function setC(i,f,v){D.cook[i][f]=f=="q"?(v===""?"":+v):v;save();summary()}
-function delC(i){D.cook.splice(i,1);save();render()}
-function addC(){var v=$("cn").value.trim();if(!v)return;D.cook.push({n:v,q:0,u:"পিস"});save();render()}
-function setI(s,i,f,v){D.shops[s].items[i][f]=f=="q"?(v===""?"":+v):v;save();render()}
-function delI(s,i){D.shops[s].items.splice(i,1);save();render()}
-function addI(s){var v=$("in"+s).value.trim();if(!v)return;D.shops[s].items.push({n:v,q:"",u:"কেজি"});save();render()}
-function addShop(){var v=prompt("দোকানের নাম:");if(v&&v.trim()){D.shops.push({name:v.trim(),items:[]});save();render()}}
-function delShop(i){if(confirm("দোকানটি পুরো মুছে ফেলবেন?")){D.shops.splice(i,1);save();render()}}
-function clearNeeds(){if(confirm("সব 'লাগবে' পরিমাণ মুছে নতুন দিনের জন্য ফাঁকা করবেন?")){D.shops.forEach(function(s){s.items.forEach(function(a){a.q=""})});save();render()}}
-function data(){var c=D.cook.map(function(a){return a.n+": "+bn(a.q)+" "+a.u});
-var s=D.shops.map(function(s){return{name:s.name,l:s.items.filter(function(a){return a.q!==""&&+a.q>0}).map(function(a){return a.n+" লাগবে "+bn(a.q)+" "+a.u})}}).filter(function(s){return s.l.length});
-return{c:c,s:s}}
-function summary(){var d=data(),h='<b style="margin-top:0">♨️ রান্নার হিসাব</b>'+d.c.map(function(x){return"• "+esc(x)}).join("<br>");
-if(!d.s.length)h+='<b>বাজারে কিছু লাগবে না</b>';
+var h='<div class="card">';D.cook.forEach(function(a,i){h+=row(a,"c",i)});h+=addrow("c","নতুন রান্নার আইটেম")+"</div>";$("cook").innerHTML=h;
+h="";D.shops.forEach(function(s,si){var g="s"+si;
+h+='<div class="sh"><span>'+esc(s.name)+'<span class="badge" id="b'+si+'" hidden></span></span><button class="x" data-act="delShop" data-s="'+si+'" title="দোকান মুছুন">✕</button></div><div class="card shopcard">';
+s.items.forEach(function(a,i){h+=row(a,g,i)});h+=addrow(g,"নতুন আইটেম")+"</div>"});
+$("shops").innerHTML=h;badges();summary()}
+function badges(){D.shops.forEach(function(s,si){var n=s.items.filter(filled).length,b=$("b"+si);if(b){b.hidden=!n;b.textContent=bn(n)}})}
+function ln(a){return a.n+": "+bn(a.q)+" "+a.u}
+function data(){return{c:D.cook.filter(filled).map(ln),s:D.shops.map(function(s){return{name:s.name,l:s.items.filter(filled).map(ln)}}).filter(function(s){return s.l.length})}}
+function summary(){var d=data(),h="";
+if(d.c.length)h+='<b>♨️ রান্নার হিসাব</b>'+d.c.map(function(x){return"• "+esc(x)}).join("<br>");
 d.s.forEach(function(s){h+="<b>"+esc(s.name)+"</b>"+s.l.map(function(x){return"• "+esc(x)}).join("<br>")});
+if(!h)h='<span style="opacity:.8">এখনও কিছু লেখা হয়নি। উপরে পরিমাণ লিখলে এখানে আসবে।</span>';
 $("sum").innerHTML=h}
 function iso(d){var m=d.getMonth()+1,x=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(x<10?"0":"")+x}
 function curDate(){var t=iso(new Date());try{var o=JSON.parse(localStorage.getItem("hotelDate")||"null");if(o&&o.on==t&&o.set)return o.set}catch(e){}return t}
 function dtxt(){return new Date(curDate()+"T00:00:00").toLocaleDateString("bn-BD",{weekday:"long",day:"numeric",month:"long"})}
 function showDate(){$("date").textContent=dtxt()+" ✎";$("dp").value=curDate()}
-function setDate(v){if(!v)return;try{localStorage.setItem("hotelDate",JSON.stringify({set:v,on:iso(new Date())}))}catch(e){}showDate()}
-function text(){var d=data(),t="আজকের হিসাব ("+dtxt()+")\n\n♨️ রান্নার হিসাব\n"+d.c.map(function(x){return"• "+x}).join("\n");
+function text(){var d=data(),t=dtxt();
+if(d.c.length)t+="\n\n♨️ রান্নার হিসাব\n"+d.c.map(function(x){return"• "+x}).join("\n");
 d.s.forEach(function(s){t+="\n\n*"+s.name+"*\n"+s.l.map(function(x){return"• "+x}).join("\n")});return t}
 function showBox(m){var b=$("box");b.value=text();b.hidden=false;$("msg").textContent=m;try{b.focus();b.select();b.setSelectionRange(0,99999)}catch(e){}}
 function share(){var t=text(),u="https://wa.me/?text="+encodeURIComponent(t);
@@ -140,8 +129,23 @@ if(navigator.share){navigator.share({text:t}).catch(function(e){if(!e||e.name!="
 function copyList(){var t=text();
 function fb(){try{var b=$("box");b.hidden=false;b.value=t;b.focus();b.select();b.setSelectionRange(0,99999);if(document.execCommand("copy")){$("msg").textContent="কপি হয়েছে।";return}}catch(e){}showBox("কপি হয়নি। নিচের লেখা চেপে ধরে কপি করুন।")}
 try{navigator.clipboard.writeText(t).then(function(){$("msg").textContent="কপি হয়েছে।"},fb)}catch(e){fb()}}
-showDate();
-render();
+function arm(b,fn){if(b.dataset.armed){fn();return}var old=b.textContent;b.dataset.armed="1";b.textContent="নিশ্চিত? আবার চাপুন";setTimeout(function(){delete b.dataset.armed;b.textContent=old},3000)}
+function onVal(e){var t=e.target,f=t.dataset&&t.dataset.f;if(!f)return;var it=list(t.dataset.g)[+t.dataset.i];if(!it)return;
+if(f=="q"){it.q=t.value===""?"":+t.value}else{it.u=t.value}save();summary();badges()}
+document.addEventListener("change",onVal);document.addEventListener("input",onVal);
+document.addEventListener("change",function(e){if(e.target.id=="dp"&&e.target.value){try{localStorage.setItem("hotelDate",JSON.stringify({set:e.target.value,on:iso(new Date())}))}catch(x){}showDate()}});
+document.addEventListener("keydown",function(e){if(e.key!="Enter")return;var id=e.target.id||"";
+if(id=="ns"){document.querySelector('[data-act="addShop"]').click()}
+else if(id.indexOf("ai-")==0){document.querySelector('[data-act="add"][data-g="'+id.slice(3)+'"]').click()}});
+document.addEventListener("click",function(e){var b=e.target.closest("[data-act]");if(!b)return;var a=b.dataset.act,g=b.dataset.g;
+if(a=="del"){list(g).splice(+b.dataset.i,1);save();render()}
+else if(a=="add"){var v=$("ai-"+g).value.trim();if(!v)return;list(g).push({n:v,q:"",u:g=="c"?"পিস":"কেজি"});save();render()}
+else if(a=="addShop"){var n=$("ns").value.trim();if(!n)return;D.shops.push({name:n,items:[]});$("ns").value="";save();render()}
+else if(a=="delShop"){arm(b,function(){D.shops.splice(+b.dataset.s,1);save();render()})}
+else if(a=="clear"){arm(b,function(){D.cook.forEach(function(x){x.q=""});D.shops.forEach(function(s){s.items.forEach(function(x){x.q=""})});save();render();$("msg").textContent="সব ফাঁকা হয়েছে।"})}
+else if(a=="share"){share()}
+else if(a=="copy"){copyList()}});
+showDate();render();
 </script>
 </body>
 </html>
