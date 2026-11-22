@@ -46,6 +46,7 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac2);outli
 .sum{background:var(--pan);color:var(--pt);border-radius:16px;padding:16px;line-height:1.8;border-top:4px solid var(--ac2)}
 .sum b{display:block;margin-top:12px;color:var(--ac2);font-size:17px}
 .sum b:first-child{margin-top:0}
+.tabs{display:flex;gap:8px;margin:14px 0 0}.tabs .btn{flex:1}.tabs .btn.on{background:var(--ac2);color:#10241f;border:0}
 .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .row .btn{flex:1;min-width:120px}
 </style>
@@ -53,6 +54,8 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac2);outli
 <body>
 <header class="top"><div><label class="dt"><small id="date"></small><input type="date" id="dp" aria-label="তারিখ বদলান"></label><h1>হোটেল রান্না ও বাজার লিস্ট</h1></div></header>
 <main>
+<div class="tabs"><button class="btn on" data-act="tab" data-t="1">বাজার ও রান্না</button><button class="btn g" data-act="tab" data-t="2">ক্লোজিং স্টক</button></div>
+<div id="v1">
 <h2>♨️ রান্নার হিসাব</h2>
 <div class="hint">আজ কোনটা কতটুকু রান্না হয়েছে বা আছে। যেটা লিখবেন শুধু সেটাই সারাংশে যাবে।</div>
 <div id="cook"></div>
@@ -71,7 +74,23 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--ac2);outli
 </div>
 <div id="msg" style="color:var(--mu);font-size:14px;margin-top:8px"></div>
 <textarea id="box" readonly hidden rows="9" style="width:100%;margin-top:8px;font:inherit;font-size:15px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px"></textarea>
-<div class="hint" style="text-align:center;margin-top:28px">সংস্করণ ৫ (শুধু নির্বাচিত আইটেম)</div>
+</div>
+<div id="v2" hidden>
+<h2>🏦 ক্লোজিং স্টক</h2>
+<div class="hint">রাতে কোনটা কতটুকু আছে লিখুন। ০ লিখলে "নেই" আসবে। ফাঁকা থাকলে সারাংশে আসবে না।</div>
+<div id="stock"></div>
+<div class="add"><input id="nk" placeholder="নতুন ক্যাটাগরি (যেমন: 🍰 মিষ্টি)"><button class="btn g" data-act="addCat">+ ক্যাটাগরি</button></div>
+<h2>মালিকের জন্য সারাংশ (নিজে নিজে তৈরি)</h2>
+<div id="sumk" class="sum"></div>
+<div class="row">
+<button class="btn y" data-act="shareK">WhatsApp এ পাঠান</button>
+<button class="btn g" data-act="copyK">কপি করুন</button>
+<button class="btn g" data-act="clearK">সব মুছুন</button>
+</div>
+<div id="msgk" style="color:var(--mu);font-size:14px;margin-top:8px"></div>
+<textarea id="boxk" readonly hidden rows="9" style="width:100%;margin-top:8px;font:inherit;font-size:15px;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px"></textarea>
+</div>
+<div class="hint" style="text-align:center;margin-top:28px">সংস্করণ ৬ (ক্লোজিং স্টক যোগ হয়েছে)</div>
 </main>
 <script>
 var KEY="hotelV4",U=["কেজি","গ্রাম","লিটার","পিস","প্যাকেট","ডজন","বস্তা","বোতল","প্লেট"];
@@ -90,13 +109,22 @@ shops:[
 {name:"খাটি পল্লী",items:mk(["ডিম"],"পিস").concat(mk(["স্টাফ চাল"],"কেজি"))},
 {name:"স্টেশনারি (সামিন ডিসপো সেন্টার)",items:mk(["বড়ো কাগজের ঠোংগা","মাঝারি কাগজের ঠোংগা","ছোট কাগজের ঠোংগা","টিস্যু পেপার","১ কেজির হ্যান্ড পলি","৩ কেজির হ্যান্ড পলি","৫ কেজি হ্যান্ড পলি","কালো ময়লার পলি","ফুড গ্রেড মিনি পলি","সস পলি","কফি কাপ","হ্যান্ড গ্লোভস","জি ক্যাপ","কোকের স্ট্রো","তেহেরীর বক্স","চিকেন পোলাও এর বক্স","থ্রি চেম্বার বক্স","বিরিয়ানি প্লাস্টিক বাটি"],"প্যাকেট")}
 ]}}
+function seedStock(){return[["🍗 Chicken",[["কাঁচা চিকেন","কেজি"],["রান্না চিকেন","কেজি"],["চিকেন গ্রেভি","কেজি"]]],
+["🥩 Tehari / Beef",[["রান্না তেহারি বিফ","কেজি"],["কাঁচা তেহারি বিফ","কেজি"],["রান্না বিফ (রেজালা)","কেজি"],["কাচা বিফ (রেজালা)","কেজি"]]],
+["🥚 Egg",[["কাঁচা ডিম","পিস"],["সিদ্ধ ডিম","পিস"]]],
+["🐟 Fish",[["মাছ","কেজি"]]],
+["🍚 Rice, Flour, Oil & Dal",[["ময়দা","কেজি"],["সরিষার তেল","লিটার"],["পাম তেল (বিরিয়ানি)","লিটার"],["পাম তেল (নাস্তা)","লিটার"],["পোলাও চাল","কেজি"],["রান্না পোলাও","কেজি"],["খিচুড়ি চাল","কেজি"],["মুগ ডাল","কেজি"],["মসুর ডাল","কেজি"],["বুটের ডাল","কেজি"]]],
+["🥬🧅 সবজি",[["পেঁয়াজ","কেজি"],["আলু","কেজি"],["পেঁপে","কেজি"],["গাজর","কেজি"],["বরবটি","কেজি"],["মিষ্টি কুমড়া","কেজি"]]],
+["🥗 Salad",[["শসা","কেজি"],["লেবু","পিস"],["কাঁচামরিচ","কেজি"]]]].map(function(c){return{name:c[0],items:c[1].map(function(a){return{n:a[0],q:"",u:a[1]}})}})}
 var D=seed();
 try{var r=JSON.parse(localStorage.getItem(KEY)||"null");if(r&&r.cook&&r.shops)D=r}catch(e){}
+if(!D.stock)D.stock=seedStock();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
 function $(i){return document.getElementById(i)}
 function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function bn(v){return String(v).replace(/\d/g,function(d){return"০১২৩৪৫৬৭৮৯"[d]})}
-function list(g){return g=="c"?D.cook:D.shops[+g.slice(1)].items}
+function list(g){return g=="c"?D.cook:g[0]=="k"?D.stock[+g.slice(1)].items:D.shops[+g.slice(1)].items}
+function sf(a){return a.q!==""&&a.q!==null&&a.q!==undefined}
 function filled(a){return a.q!==""&&a.q!==null&&a.q!==undefined&&+a.q>0}
 function row(a,g,i){var d='data-g="'+g+'" data-i="'+i+'"';
 var sel='<select class="u" '+d+' data-f="u">'+U.map(function(x){return"<option"+(x==a.u?" selected":"")+">"+x+"</option>"}).join("")+"</select>";
@@ -107,8 +135,12 @@ var h='<div class="card">';D.cook.forEach(function(a,i){h+=row(a,"c",i)});h+=add
 h="";D.shops.forEach(function(s,si){var g="s"+si;
 h+='<div class="sh"><span>'+esc(s.name)+'<span class="badge" id="b'+si+'" hidden></span></span><button class="x" data-act="delShop" data-s="'+si+'" title="দোকান মুছুন">✕</button></div><div class="card shopcard">';
 s.items.forEach(function(a,i){h+=row(a,g,i)});h+=addrow(g,"নতুন আইটেম")+"</div>"});
-$("shops").innerHTML=h;badges();summary()}
-function badges(){D.shops.forEach(function(s,si){var n=s.items.filter(filled).length,b=$("b"+si);if(b){b.hidden=!n;b.textContent=bn(n)}})}
+$("shops").innerHTML=h;
+h="";D.stock.forEach(function(c,ci){var g="k"+ci;
+h+='<div class="sh"><span>'+esc(c.name)+'<span class="badge" id="kb'+ci+'" hidden></span></span><button class="x" data-act="delCat" data-s="'+ci+'" title="ক্যাটাগরি মুছুন">✕</button></div><div class="card shopcard">';
+c.items.forEach(function(a,i){h+=row(a,g,i)});h+=addrow(g,"নতুন আইটেম")+"</div>"});
+$("stock").innerHTML=h;badges();summary();summaryK()}
+function badges(){D.stock.forEach(function(c,ci){var n=c.items.filter(sf).length,b=$("kb"+ci);if(b){b.hidden=!n;b.textContent=bn(n)}});D.shops.forEach(function(s,si){var n=s.items.filter(filled).length,b=$("b"+si);if(b){b.hidden=!n;b.textContent=bn(n)}})}
 function ln(a){return a.n+": "+bn(a.q)+" "+a.u}
 function data(){return{c:D.cook.filter(filled).map(ln),s:D.shops.map(function(s){return{name:s.name,l:s.items.filter(filled).map(ln)}}).filter(function(s){return s.l.length})}}
 function summary(){var d=data(),h="";
@@ -123,24 +155,36 @@ function showDate(){$("date").textContent=dtxt()+" ✎";$("dp").value=curDate()}
 function text(){var d=data(),t=dtxt();
 if(d.c.length)t+="\n\n♨️ রান্নার হিসাব\n"+d.c.map(function(x){return"• "+x}).join("\n");
 d.s.forEach(function(s){t+="\n\n*"+s.name+"*\n"+s.l.map(function(x){return"• "+x}).join("\n")});return t}
-function showBox(m){var b=$("box");b.value=text();b.hidden=false;$("msg").textContent=m;try{b.focus();b.select();b.setSelectionRange(0,99999)}catch(e){}}
-function share(){var t=text(),u="https://wa.me/?text="+encodeURIComponent(t);
-function wa(){var w=null;try{w=window.open(u,"_blank")}catch(e){}if(!w){showBox("WhatsApp খোলেনি। নিচের লেখা চেপে ধরে কপি করুন, তারপর WhatsApp এ পেস্ট করুন।")}}
+function kln(a){return a.n+": "+(+a.q==0?"নেই":bn(a.q)+" "+a.u)}
+function dataK(){return D.stock.map(function(c){return{name:c.name,l:c.items.filter(sf).map(kln)}}).filter(function(c){return c.l.length})}
+function summaryK(){var d=dataK(),h="";d.forEach(function(c,i){h+="<b"+(i?"":' style="margin-top:0"')+">"+esc(c.name)+"</b>"+c.l.map(function(x){return"• "+esc(x)}).join("<br>")});
+if(!h)h='<span style="opacity:.8">এখনও কিছু লেখা হয়নি। উপরে পরিমাণ লিখলে এখানে আসবে।</span>';$("sumk").innerHTML=h}
+function textK(){var t=dtxt()+"\n\n🏦 Closing Stock";dataK().forEach(function(c){t+="\n"+c.name+"\n"+c.l.map(function(x){return"• "+x}).join("\n")});return t}
+function showBox(m,k){var b=$(k?"boxk":"box");b.value=k?textK():text();b.hidden=false;$(k?"msgk":"msg").textContent=m;try{b.focus();b.select();b.setSelectionRange(0,99999)}catch(e){}}
+function share(k){var t=k?textK():text(),u="https://wa.me/?text="+encodeURIComponent(t);
+function wa(){var w=null;try{w=window.open(u,"_blank")}catch(e){}if(!w){showBox("WhatsApp খোলেনি। নিচের লেখা চেপে ধরে কপি করুন, তারপর WhatsApp এ পেস্ট করুন।",k)}}
 if(navigator.share){navigator.share({text:t}).catch(function(e){if(!e||e.name!="AbortError")wa()})}else wa()}
-function copyList(){var t=text();
-function fb(){try{var b=$("box");b.hidden=false;b.value=t;b.focus();b.select();b.setSelectionRange(0,99999);if(document.execCommand("copy")){$("msg").textContent="কপি হয়েছে।";return}}catch(e){}showBox("কপি হয়নি। নিচের লেখা চেপে ধরে কপি করুন।")}
-try{navigator.clipboard.writeText(t).then(function(){$("msg").textContent="কপি হয়েছে।"},fb)}catch(e){fb()}}
+function copyList(k){var t=k?textK():text(),mg=$(k?"msgk":"msg");
+function fb(){try{var b=$(k?"boxk":"box");b.hidden=false;b.value=t;b.focus();b.select();b.setSelectionRange(0,99999);if(document.execCommand("copy")){mg.textContent="কপি হয়েছে।";return}}catch(e){}showBox("কপি হয়নি। নিচের লেখা চেপে ধরে কপি করুন।",k)}
+try{navigator.clipboard.writeText(t).then(function(){mg.textContent="কপি হয়েছে।"},fb)}catch(e){fb()}}
 function arm(b,fn){if(b.dataset.armed){fn();return}var old=b.textContent;b.dataset.armed="1";b.textContent="নিশ্চিত? আবার চাপুন";setTimeout(function(){delete b.dataset.armed;b.textContent=old},3000)}
 function onVal(e){var t=e.target,f=t.dataset&&t.dataset.f;if(!f)return;var it=list(t.dataset.g)[+t.dataset.i];if(!it)return;
-if(f=="q"){it.q=t.value===""?"":+t.value}else{it.u=t.value}save();summary();badges()}
+if(f=="q"){it.q=t.value===""?"":+t.value}else{it.u=t.value}save();summary();summaryK();badges()}
 document.addEventListener("change",onVal);document.addEventListener("input",onVal);
 document.addEventListener("change",function(e){if(e.target.id=="dp"&&e.target.value){try{localStorage.setItem("hotelDate",JSON.stringify({set:e.target.value,on:iso(new Date())}))}catch(x){}showDate()}});
 document.addEventListener("keydown",function(e){if(e.key!="Enter")return;var id=e.target.id||"";
 if(id=="ns"){document.querySelector('[data-act="addShop"]').click()}
+else if(id=="nk"){document.querySelector('[data-act="addCat"]').click()}
 else if(id.indexOf("ai-")==0){document.querySelector('[data-act="add"][data-g="'+id.slice(3)+'"]').click()}});
 document.addEventListener("click",function(e){var b=e.target.closest("[data-act]");if(!b)return;var a=b.dataset.act,g=b.dataset.g;
-if(a=="del"){list(g).splice(+b.dataset.i,1);save();render()}
-else if(a=="add"){var v=$("ai-"+g).value.trim();if(!v)return;list(g).push({n:v,q:"",u:g=="c"?"পিস":"কেজি"});save();render()}
+if(a=="tab"){var t=b.dataset.t;$("v1").hidden=t!="1";$("v2").hidden=t!="2";document.querySelectorAll(".tabs .btn").forEach(function(x){x.className="btn "+(x.dataset.t==t?"on":"g")});window.scrollTo(0,0)}
+else if(a=="shareK"){share(1)}
+else if(a=="copyK"){copyList(1)}
+else if(a=="addCat"){var n=$("nk").value.trim();if(!n)return;D.stock.push({name:n,items:[]});$("nk").value="";save();render()}
+else if(a=="delCat"){arm(b,function(){D.stock.splice(+b.dataset.s,1);save();render()})}
+else if(a=="clearK"){arm(b,function(){D.stock.forEach(function(c){c.items.forEach(function(x){x.q=""})});save();render();$("msgk").textContent="সব ফাঁকা হয়েছে।"})}
+else if(a=="del"){list(g).splice(+b.dataset.i,1);save();render()}
+else if(a=="add"){var v=$("ai-"+g).value.trim();if(!v)return;list(g).push({n:v,q:"",u:g=="c"?"পিস":"কেজি"});save();render();var f=$("ai-"+g);if(f)f.focus()}
 else if(a=="addShop"){var n=$("ns").value.trim();if(!n)return;D.shops.push({name:n,items:[]});$("ns").value="";save();render()}
 else if(a=="delShop"){arm(b,function(){D.shops.splice(+b.dataset.s,1);save();render()})}
 else if(a=="clear"){arm(b,function(){D.cook.forEach(function(x){x.q=""});D.shops.forEach(function(s){s.items.forEach(function(x){x.q=""})});save();render();$("msg").textContent="সব ফাঁকা হয়েছে।"})}
